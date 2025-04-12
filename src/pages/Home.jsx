@@ -1,15 +1,26 @@
 // src/pages/Home.jsx
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchUsers } from '../store/async/usersAsync';
 import UserCard from '../components/UserCard';
 
 export default function Home() {
-  const [users, setUsers] = useState([]);
+  const dispatch = useDispatch();
+  const { users, status, error } = useSelector((state) => state.users);
 
   useEffect(() => {
-    fetch('https://fakestoreapi.com/users')
-      .then((res) => res.json())
-      .then((data) => setUsers(data));
-  }, []);
+    if (status === 'idle') {
+      dispatch(fetchUsers());
+    }
+  }, [status, dispatch]);
+
+  if (status === 'loading') {
+    return <div className="text-center p-4">Загрузка...</div>;
+  }
+
+  if (status === 'failed') {
+    return <div className="text-center p-4 text-red-500">Ошибка: {error}</div>;
+  }
 
   return (
     <div className="container mx-auto p-4">
